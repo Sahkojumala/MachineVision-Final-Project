@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Virtuaaliympäristöt
+venv*/
+.venv/
+
+# Data ja mallit (isot tiedostot)
+data/
+datasets/
+*.pt
+*.pth
+*.h5
+*.keras
+*.onnx
+*.zip
+
+# Salaisuudet
+.env
