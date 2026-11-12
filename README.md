@@ -39,3 +39,18 @@ Dice = 2·|prediction ∩ ground truth| / (|prediction| + |ground truth|), predi
 ## License
 `model.py` contains code from [deep-pipeline](https://github.com/lext/deep-pipeline)
 by Aleksei Tiulpin, released under the MIT License (see `LICENSE`).
+
+
+## Experiments
+One change at a time; all other settings the same (seed 42, Adam lr 1e-3, batch size 16).
+Mean Dice = validation set (20 images), from `evaluate.py`.
+
+| # | Change | Epochs | Mean Dice | Min Dice | Notes |
+|---|---|---|---|---|---|
+| 0 | Baseline: U-Net, Dice loss | 50 | 0.9806 | 0.9158 | holes and small false spots in some test masks |
+| 1 | Baseline | 100 | 0.9821 | 0.9201 | best epoch 97, curves flat after ~60 epochs |
+| 2 | + augmentation (flip, rotation ±10°, shift, scale, brightness/contrast) | 100 | | | |
+
+
+Note: runs with the same seed still differ by about ±0.002–0.003 Dice
+(GPU computations are not fully deterministic), so smaller differences are not meaningful.

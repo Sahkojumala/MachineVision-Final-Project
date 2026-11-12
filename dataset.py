@@ -6,6 +6,9 @@ and which part is Y (the mask).
 """
 import cv2
 import numpy as np
+import torch
+from torchvision import tv_tensors
+from torchvision.transforms import v2
 from torch.utils.data import Dataset
 
 
@@ -33,10 +36,36 @@ def read_mask(path):
     return mask
 
 
+# Augmentation for the training set only.
+# Geometric transforms (flip, rotation, shift, scale) are applied to the X-ray AND the mask
+# in exactly the same way. ColorJitter changes only the X-ray, because the bone does not move.
+train_transforms = v2.Compose([
+    v2.RandomHorizontalFlip(p=0.5),                  # left knee <-> right knee
+    v2.RandomAffine(degrees=10,                      # rotation -10...+10 degrees
+                    translate=(0.05, 0.05),          # shift max 5 % of the image size
+                    scale=(0.95, 1.05)),             # zoom 95 %...105 %
+    v2.ColorJitter(brightness=0.2, contrast=0.2),    # brightness / contrast +-20 %
+])
+
+
+def augment(xray, mask):
+    # tv_tensors tell torchvision which tensor is the image and which is the mask.
+    # The mask is then rotated with "nearest" interpolation, so it stays binary (0 or 1),
+    # and ColorJitter is not applied to the mask.
+    xray = tv_tensors.Image(torch.from_numpy(xray))
+    mask = tv_tensors.Mask(torch.from_numpy(mask))
+
+    xray, mask = train_transforms(xray, mask)
+
+    return xray.numpy(), mask.numpy()   # Back to numpy, so the output is the same type as without augmentation
+
+
 class KneeDataset(Dataset):
-    def __init__(self, df):                                         # muista taulukko
+    def __init__(self, df, augment=False):                                         # muista taulukko
         # df = pandas DataFrame with columns "xrays" and "masks"
-        self.df = df
+        # augment = True only for the training set
+        self.df = df    
+        self.augment = augment
 
     def __len__(self):                                              # montako kuvaa
         return len(self.df)
@@ -45,10 +74,19 @@ class KneeDataset(Dataset):
         xray_path = self.df["xrays"].iloc[index]                    # "data/xrays/55.png"
         mask_path = self.df["masks"].iloc[index]                    # "data/masks/55.png"
 
-        result = {"xray": read_xray(xray_path), "xray_path": xray_path}
+        xray = read_xray(xray_path)
+        result = {"xray": xray, "xray_path": xray_path}
 
         # Test images do not have a mask (the CSV says "None")
         if isinstance(mask_path, str) and mask_path != "None":
-            result["mask"] = read_mask(mask_path)
+            mask = read_mask(mask_path)
+
+            # New random version of the image every time it is loaded (= every epoch)
+            if self.augment:
+                xray, mask = augment(xray, mask)
+
+            result["xray"] = xray
+            result["mask"] = mask
 
         return result
+    

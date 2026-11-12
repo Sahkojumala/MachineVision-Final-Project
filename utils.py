@@ -3,6 +3,7 @@ utils.py - helper functions.
 
 dice_loss_from_logits and dice_score_from_logits are from the course (Mitra, 11.11.2026).
 """
+import os
 import random
 
 import numpy as np
@@ -41,6 +42,33 @@ def set_seed(seed):
 
 def get_device():
     return torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+
+def save_augmentation_examples(dataset, save_path, n_images=3, n_versions=5):
+    # Same image loaded several times -> a new random augmentation every time.
+    # Red = mask on top of the augmented X-ray: it must still match the bone.
+    os.makedirs(os.path.dirname(save_path), exist_ok=True)
+
+    fig, axes = plt.subplots(n_images, n_versions, figsize=(3 * n_versions, 3 * n_images))
+    for row in range(n_images):
+        for col in range(n_versions):
+            sample = dataset[row]
+            xray = sample["xray"][0]            # [0] poistaa kanavaulottuvuuden: (1, 224, 224) → (224, 224)
+            mask = sample["mask"][0]
+
+            colored = np.zeros((*mask.shape, 4))
+            colored[mask > 0] = [1, 0, 0, 0.35]
+
+            ax = axes[row, col]
+            ax.imshow(xray, cmap="gray", vmin=0, vmax=1)    # vmin=0, vmax=1 pitää harmaasävyasteikon kiinteänä. Ilman matplotlib venyttäisi kuvan kontrastin automaattisesti, eikä kirkkausmuutos näkyisi kuvissa
+            ax.imshow(colored)
+            ax.set_title(f"image {row}, version {col + 1}", fontsize=8)
+            ax.axis("off")
+
+    fig.tight_layout()
+    fig.savefig(save_path, dpi=100)
+    plt.close(fig)
+    print("Augmentation examples saved to:", save_path)
 
 
 def plot_learning_curves(history, save_path):

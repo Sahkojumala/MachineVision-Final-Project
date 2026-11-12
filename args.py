@@ -19,6 +19,21 @@ def get_args():
     parser.add_argument("--bs", type=int, default=16, help="batch size")
     parser.add_argument("--lr", type=float, default=1e-3, help="learning rate for Adam")
     parser.add_argument("--seed", type=int, default=42, help="random seed")
+    # Improvements (off by default = baseline)
+    parser.add_argument("--augment", action="store_true", help="use data augmentation for the training set")
 
     args = parser.parse_args()
     return args
+
+
+
+"""
+1.
+python main.py --epochs 100 --out_dir outputs/baseline
+python evaluate.py --out_dir outputs/baseline
+
+2.
+python main.py --epochs 100 --augment --out_dir outputs/augment
+python evaluate.py --out_dir outputs/augment
+
+"""

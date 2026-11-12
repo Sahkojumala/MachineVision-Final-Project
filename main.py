@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader
 from args import get_args
 from dataset import KneeDataset
 from trainer import train
-from utils import set_seed
+from utils import set_seed, save_augmentation_examples
 
 
 def main():
@@ -24,9 +24,15 @@ def main():
     val_df = pd.read_csv(os.path.join(args.csv_dir, "val.csv"))
     print(f"Training images: {len(train_df)} | validation images: {len(val_df)}")
 
-    # 2. Define X and Y for the model
-    train_dataset = KneeDataset(train_df)
-    val_dataset = KneeDataset(val_df)
+    # 2. Define X and Y for the model (augmentation only for the training set)
+    train_dataset = KneeDataset(train_df, augment=args.augment)
+    val_dataset = KneeDataset(val_df, augment=False)                        
+    # Validaatiodatalle annetaan aina augment=False, jotta tulokset ovat vertailukelpoisia perusversion kanssa.
+    print("Augmentation:", "on" if args.augment else "off")
+
+    # Save a picture of augmented samples, to check them before training
+    if args.augment:
+        save_augmentation_examples(train_dataset, os.path.join(args.out_dir, "augmentation_examples.png"))
 
     # 3. Data loaders: shuffle the training set, not the validation set
     train_loader = DataLoader(train_dataset, batch_size=args.bs, shuffle=True)
