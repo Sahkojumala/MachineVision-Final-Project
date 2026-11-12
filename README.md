@@ -8,6 +8,8 @@ A U-Net is trained to segment one bone from knee X-ray images (224×224, graysca
 - `data/masks/` – 100 manually annotated binary masks (images 0–99)
 - `data/CSVs/` – `train.csv` (80), `val.csv` (20), `test.csv` (50, no masks), made with `make_csv.py`
 
+- The data is not included.
+
 ## Project structure
 | File | Purpose |
 |---|---|

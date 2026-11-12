@@ -10,7 +10,8 @@ venv*/
 # Data ja mallit (isot tiedostot)
 data/
 datasets/
-outputs/
+# outputs/
+outputs/**/test_masks/
 *.pt
 *.pth
 *.h5
