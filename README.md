@@ -49,7 +49,7 @@ Mean Dice = validation set (20 images), from `evaluate.py`.
 |---|---|---|---|---|---|
 | 0 | Baseline: U-Net, Dice loss | 50 | 0.9806 | 0.9158 | holes and small false spots in some test masks |
 | 1 | Baseline | 100 | 0.9821 | 0.9201 | best epoch 97, curves flat after ~60 epochs |
-| 2 | + augmentation (flip, rotation ±10°, shift, scale, brightness/contrast) | 100 | | | |
+| 2 | + augmentation | 100 | 0.9822 | 0.9147 | 14/20 images better; unstable epochs 63–70; best epoch 100 |
 
 
 Note: runs with the same seed still differ by about ±0.002–0.003 Dice
