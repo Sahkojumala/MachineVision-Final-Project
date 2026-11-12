@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 
 def dice_loss_from_logits(logits, targets, eps: float = 1e-6):
-    probs = torch.sigmoid(logits)  # (B,1,H,W)
+    probs = torch.sigmoid(logits)                               # (B,1,H,W) logitit → todennäköisyydet 0…1
     targets = targets.float()
     dims = (1,2,3)
     intersection = (probs * targets).sum(dims)
@@ -19,10 +19,10 @@ def dice_loss_from_logits(logits, targets, eps: float = 1e-6):
     dice = (2.0 * intersection + eps) / (union + eps)
     return 1.0 - dice.mean()
 
-@torch.no_grad()
+@torch.no_grad()                                                # gradienttia ei tarvita
 def dice_score_from_logits(logits, targets, eps: float = 1e-6):
     probs = torch.sigmoid(logits)
-    preds = (probs > 0.5).float()
+    preds = (probs > 0.5).float()                               # make 0 or 1
     targets = targets.float()
     dims = (1,2,3)
     intersection = (preds * targets).sum(dims)

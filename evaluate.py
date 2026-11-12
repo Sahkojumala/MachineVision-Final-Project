@@ -22,21 +22,21 @@ from model import UNet
 from utils import dice_score_from_logits, get_device
 
 
-def predict(model, xray, device):
+def predict(model, xray, device):                               # (1,1,224,224)
     # xray: tensor (1, 1, H, W) -> binary mask as numpy (H, W)
     with torch.no_grad():
         logits = model(xray.to(device))
-    probs = torch.sigmoid(logits)
-    pred = (probs > 0.5).float()
-    return logits, pred[0, 0].cpu().numpy()
+    probs = torch.sigmoid(logits)                               # 0…1
+    pred = (probs > 0.5).float()                                # 0 tai 1
+    return logits, pred[0, 0].cpu().numpy()                     # (1,1,224,224) → (224,224) NumPy-taulukkona
 
 
 def overlay(ax, xray, mask, color, title):
     # Show the X-ray in gray and the mask as a transparent color on top
-    ax.imshow(xray, cmap="gray")
-    colored = np.zeros((*mask.shape, 4))
-    colored[mask > 0] = color
-    ax.imshow(colored)
+    ax.imshow(xray, cmap="gray")                                # pohjalle harmaasävykuva
+    colored = np.zeros((*mask.shape, 4))                        # (224,224,4) = R, G, B, läpinäkyvyys
+    colored[mask > 0] = color                                   # esim. [1, 0, 0, 0.4] = punainen, 40 % peittävä
+    ax.imshow(colored)                                          # päälle läpinäkyvä värikerros
     ax.set_title(title, fontsize=9)
     ax.axis("off")
 
@@ -57,7 +57,7 @@ def evaluate_validation(model, val_df, device, out_dir):
         })
 
     results = pd.DataFrame([{"image": r["image"], "dice": r["dice"]} for r in rows])
-    results.to_csv(os.path.join(out_dir, "val_dice_scores.csv"), index=False)
+    results.to_csv(os.path.join(out_dir, "val_dice_scores.csv"), index=False)       # list
 
     print("Dice score per validation image:")
     print(results.to_string(index=False, float_format="%.4f"))
@@ -73,7 +73,7 @@ def evaluate_validation(model, val_df, device, out_dir):
         overlay(axes[i, 1], r["xray"], r["mask"], [0, 1, 0, 0.4], "ground truth")
         overlay(axes[i, 2], r["xray"], r["pred"], [1, 0, 0, 0.4], f"prediction, Dice {r['dice']:.3f}")
     fig.tight_layout()
-    fig.savefig(os.path.join(out_dir, "val_predictions.png"), dpi=100)
+    fig.savefig(os.path.join(out_dir, "val_predictions.png"), dpi=100)              # pic
     plt.close(fig)
 
 

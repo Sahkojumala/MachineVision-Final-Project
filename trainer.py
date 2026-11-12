@@ -14,20 +14,20 @@ def train_one_epoch(model, loader, optimizer, device):
     model.train()
     total_loss = 0.0
 
-    for batch in loader:
-        xrays = batch["xray"].to(device)
-        masks = batch["mask"].to(device)
+    for batch in loader:                                # 5 erää
+        xrays = batch["xray"].to(device)                #  (16,1,224,224) GPU:lle
+        masks = batch["mask"].to(device)                
 
-        optimizer.zero_grad()                         # reset the gradients
-        logits = model(xrays)                         # forward pass
-        loss = dice_loss_from_logits(logits, masks)   # calculate the loss
-        loss.backward()                               # backpropagation
-        optimizer.step()                              # update weights
+        optimizer.zero_grad()                           # reset the gradients
+        logits = model(xrays)                           # forward pass   (16,1,224,224)
+        loss = dice_loss_from_logits(logits, masks)     # calculate the loss
+        loss.backward()                                 # backpropagation  # gradientit jokaiselle painolle
+        optimizer.step()                                # update weights
 
-        total_loss += loss.item()
+        total_loss += loss.item()                       # tensor to int
 
     # Average loss of all batches = loss of this epoch
-    return total_loss / len(loader)
+    return total_loss / len(loader)                     # epochin loss = erien keskiarvo
 
 
 def validate(model, loader, device):
@@ -47,12 +47,13 @@ def validate(model, loader, device):
     return total_loss / len(loader), total_dice / len(loader)
 
 
+# main funktion
 def train(args, train_loader, val_loader):
     device = get_device()
     print("Device:", device)
 
     # Model initialization: 1 input channel (grayscale), 1 output channel (bone)
-    model = UNet(n_inputs=1, n_classes=1).to(device)
+    model = UNet(n_inputs=1, n_classes=1).to(device)                    # mallin alustus ja siirto GPU:lle
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
 
     os.makedirs(args.out_dir, exist_ok=True)
