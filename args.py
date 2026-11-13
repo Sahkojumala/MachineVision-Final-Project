@@ -38,4 +38,8 @@ python evaluate.py --out_dir outputs/baseline
 python main.py --epochs 100 --augment --out_dir outputs/augment
 python evaluate.py --out_dir outputs/augment
 
+3.
+python main.py --epochs 100 --augment --scheduler --out_dir outputs/augment_sched
+python evaluate.py --out_dir outputs/augment_sched
+
 """
