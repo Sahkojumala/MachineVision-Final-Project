@@ -74,7 +74,7 @@ def save_augmentation_examples(dataset, save_path, n_images=3, n_versions=5):
 def plot_learning_curves(history, save_path):
     epochs = range(1, len(history["train_loss"]) + 1)
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(18, 4))
 
     ax1.plot(epochs, history["train_loss"], label="train")
     ax1.plot(epochs, history["val_loss"], label="validation")
@@ -88,6 +88,12 @@ def plot_learning_curves(history, save_path):
     ax2.set_ylabel("Dice score")
     ax2.set_title("Validation Dice")
     ax2.legend()
+
+    ax3.plot(epochs, history["lr"], color="purple")
+    ax3.set_yscale("log")
+    ax3.set_xlabel("epoch")
+    ax3.set_ylabel("learning rate")
+    ax3.set_title("Learning rate")
 
     fig.tight_layout()
     fig.savefig(save_path, dpi=150)

@@ -21,6 +21,8 @@ def get_args():
     parser.add_argument("--seed", type=int, default=42, help="random seed")
     # Improvements (off by default = baseline)
     parser.add_argument("--augment", action="store_true", help="use data augmentation for the training set")
+    parser.add_argument("--scheduler", action="store_true", help="use ReduceLROnPlateau learning rate scheduler")
+    parser.add_argument("--patience", type=int, default=5, help="scheduler: epochs without improvement before lr is reduced")
 
     args = parser.parse_args()
     return args

@@ -55,23 +55,37 @@ def train(args, train_loader, val_loader):
     # Model initialization: 1 input channel (grayscale), 1 output channel (bone)
     model = UNet(n_inputs=1, n_classes=1).to(device)                    # mallin alustus ja siirto GPU:lle
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
+    # Learning rate scheduler: halve the lr when the validation loss has not improved
+    # for "patience" epochs. None = no scheduler (constant lr, as in the baseline).
+    scheduler = None
+    if args.scheduler:
+        scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min", factor=0.5, patience=args.patience)
 
     os.makedirs(args.out_dir, exist_ok=True)
     best_model_path = os.path.join(args.out_dir, "best_model.pth")
 
-    history = {"train_loss": [], "val_loss": [], "val_dice": []}
+    history = {"train_loss": [], "val_loss": [], "val_dice": [], "lr": []}
     best_val_loss = float("inf")
 
     for epoch in range(1, args.epochs + 1):
         train_loss = train_one_epoch(model, train_loader, optimizer, device)
         val_loss, val_dice = validate(model, val_loader, device)
 
+        # The lr that was used in this epoch
+        current_lr = optimizer.param_groups[0]["lr"]
+
         history["train_loss"].append(train_loss)
         history["val_loss"].append(val_loss)
         history["val_dice"].append(val_dice)
+        history["lr"].append(current_lr)
 
-        text = f"Epoch {epoch:3d}/{args.epochs} | train loss {train_loss:.4f} | val loss {val_loss:.4f} | val Dice {val_dice:.4f}"
+        # The scheduler looks at the validation loss and reduces the lr if needed
+        if scheduler is not None:
+            scheduler.step(val_loss)
 
+        text = (f"Epoch {epoch:3d}/{args.epochs} | lr {current_lr:.1e} | train loss {train_loss:.4f} "
+                f"| val loss {val_loss:.4f} | val Dice {val_dice:.4f}")
+        
         # Save the model only when the validation loss is the best so far
         if val_loss < best_val_loss:
             best_val_loss = val_loss
