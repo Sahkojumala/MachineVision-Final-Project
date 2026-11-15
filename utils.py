@@ -15,8 +15,8 @@ def dice_loss_from_logits(logits, targets, eps: float = 1e-6):
     probs = torch.sigmoid(logits)                               # (B,1,H,W) logitit → todennäköisyydet 0…1
     targets = targets.float()
     dims = (1,2,3)
-    intersection = (probs * targets).sum(dims)
-    union = probs.sum(dims) + targets.sum(dims)
+    intersection = (probs * targets).sum(dims)                  # yhteinen alue
+    union = probs.sum(dims) + targets.sum(dims)                 # ennusteen ala + oikean maskin ala
     dice = (2.0 * intersection + eps) / (union + eps)
     return 1.0 - dice.mean()
 
