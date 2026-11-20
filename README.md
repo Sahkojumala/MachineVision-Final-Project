@@ -37,8 +37,15 @@ validation set (20 images). The test set predictions are checked visually
 Dice = 2·|prediction ∩ ground truth| / (|prediction| + |ground truth|), predictions thresholded at 0.5.
 
 ## License
-`model.py` contains code from [deep-pipeline](https://github.com/lext/deep-pipeline)
-by Aleksei Tiulpin, released under the MIT License (see `LICENSE`).
+This project uses a U-Net model implementation from [deep-pipeline] (https://github.com/lext/deep-pipeline), originally developed by Aleksei Tiulpin.
+
+Model license: MIT License
+
+The original implementation has been adapted and combined into `model.py` for this project.
+
+The original copyright notice and full MIT License text are included in the `LICENSE` file.
+
+Original source: deep-pipeline U-Net implementation.
 
 
 ## Experiments
